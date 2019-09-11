@@ -1,6 +1,7 @@
 const express = require("express");
 
 const db = require("../data/db-config.js");
+const userModel = require("./user-model");
 
 const router = express.Router();
 
@@ -85,22 +86,15 @@ router.delete("/:id", (req, res) => {
 
 // GET at localhost:9000/api/users/2/posts
 
-// SQL Translation: select * from posts as p
-// join users as u on u.id = p.user_id
-// where u.id = 2
+router.get("/:id/posts", (req, res) => {
+  const { id } = req.params;
 
-// look at knex.js join methods for more info
-router.get("/:id/posts", (request, response) => {
-  const { id } = request.params;
-  db("posts")
-    .join("users", "users.id", "=", "posts.user_id")
-    .where({ user_id: id })
+  userModel
+    .findUserPosts(id)
     .then(posts => {
-      response.status(200).json(posts);
+      res.status(200).json(posts);
     })
-    .catch(error => {
-      response.status(500).json({ message: "Failed to get user posts" });
-    });
+    .catch(error => res.send(error));
 });
 
 module.exports = router;
